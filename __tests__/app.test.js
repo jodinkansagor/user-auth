@@ -33,7 +33,7 @@ describe('app routes', () => {
       });
   });
 
-  it('can login a user', async() => {
+  it('can login a user', async () => {
     const user = await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
     return request(app)
       .post('/api/v1/auth/login')
@@ -41,34 +41,34 @@ describe('app routes', () => {
       .then(res => {
         expect(res.body).toEqual({
           _id: user.id,
-          username: 'jbj', 
+          username: 'jbj',
           email: 'jbj@jbj.com',
           __v: 0
         });
       });
   });
 
-  it('fails when a bad email is used', async() => {
+  it('fails when a bad email is used', async () => {
     await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
     return request(app)
       .post('/api/v1/auth/login')
       .send({ username: 'jbj', email: 'jbj@notjbj.com', password: 'mydumbpassword' })
       .then(res => {
         expect(res.body).toEqual({
-          message: 'Invalid/Password',
+          message: 'Invalid Email/Password',
           status: 401
         });
       });
   });
 
-  it('fails when a bad password is used', async() => {
+  it('fails when a bad password is used', async () => {
     await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
     return request(app)
       .post('/api/v1/auth/login')
       .send({ username: 'jbj', email: 'jbj@jbj.com', password: 'myotherdumbpassword' })
       .then(res => {
         expect(res.body).toEqual({
-          message: 'Invalid/Password',
+          message: 'Invalid Email/Password',
           status: 401
         });
       });
