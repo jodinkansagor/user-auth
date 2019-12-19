@@ -4,6 +4,7 @@ const request = require('supertest');
 const app = require('../lib/app');
 const connect = require('../lib/utils/connect');
 const mongoose = require('mongoose');
+const User = require('../lib/models/User');
 
 describe('app routes', () => {
   beforeAll(() => {
@@ -28,6 +29,47 @@ describe('app routes', () => {
           username: 'jbj',
           email: 'jbj@jbj.com',
           __v: 0
+        });
+      });
+  });
+
+  it('can login a user', async() => {
+    const user = await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
+    return request(app)
+      .post('/api/v1/auth/login')
+      .send({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' })
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: user.id,
+          username: 'jbj', 
+          email: 'jbj@jbj.com',
+          __v: 0
+        });
+      });
+  });
+
+  it('fails when a bad email is used', async() => {
+    await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
+    return request(app)
+      .post('/api/v1/auth/login')
+      .send({ username: 'jbj', email: 'jbj@notjbj.com', password: 'mydumbpassword' })
+      .then(res => {
+        expect(res.body).toEqual({
+          message: 'Invalid/Password',
+          status: 401
+        });
+      });
+  });
+
+  it('fails when a bad password is used', async() => {
+    await User.create({ username: 'jbj', email: 'jbj@jbj.com', password: 'mydumbpassword' });
+    return request(app)
+      .post('/api/v1/auth/login')
+      .send({ username: 'jbj', email: 'jbj@jbj.com', password: 'myotherdumbpassword' })
+      .then(res => {
+        expect(res.body).toEqual({
+          message: 'Invalid/Password',
+          status: 401
         });
       });
   });
